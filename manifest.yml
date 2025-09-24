@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: guestbook
+  name: demo-echo
   namespace: argocd
 spec:
   project: default
@@ -9,11 +9,11 @@ spec:
   source:
     repoURL: https://github.com/argoproj/argocd-example-apps.git
     targetRevision: HEAD
-    path: guestbook
+    path: helm-guestbook   # example path in public repo
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: guestbook
+    namespace: demo-echo
 
   syncPolicy:
     automated:
@@ -21,3 +21,42 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-server
+  namespace: demo-echo
+  labels:
+    app: echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+        - name: echo
+          image: hashicorp/http-echo:0.2.3
+          args:
+            - "-text=Hello from Argo CD"
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-service
+  namespace: demo-echo
+spec:
+  selector:
+    app: echo
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5678
+  type: ClusterIP
