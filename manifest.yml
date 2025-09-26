@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nextjs-container
-          image: suzalshrestha/test:1
+          image: suzalshrestha/test:0d2d9ab3a352c23874d32a1d282af416be7d1404
           ports:
             - containerPort: 3000
 
