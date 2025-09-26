@@ -1,62 +1,33 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: demo-echo
-  namespace: argocd
-spec:
-  project: default
-
-  source:
-    repoURL: https://github.com/argoproj/argocd-example-apps.git
-    targetRevision: HEAD
-    path: helm-guestbook   # example path in public repo
-
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: demo-echo
-
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: echo-server
-  namespace: demo-echo
-  labels:
-    app: echo
+  name: nextjs-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: echo
+      app: nextjs
   template:
     metadata:
       labels:
-        app: echo
+        app: nextjs
     spec:
       containers:
-        - name: echo
-          image: hashicorp/http-echo:0.2.3
-          args:
-            - "-text=Hello from Argo CD"
+        - name: nextjs-container
+          image: suzalshrestha/test:1
           ports:
-            - containerPort: 5678
+            - containerPort: 3000
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-service
-  namespace: demo-echo
+  name: nextjs-service
 spec:
+  type: LoadBalancer
   selector:
-    app: echo
+    app: nextjs
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 5678
-  type: ClusterIP
+      targetPort: 3000
